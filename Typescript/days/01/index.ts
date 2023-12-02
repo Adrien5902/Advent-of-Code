@@ -1,6 +1,3 @@
-import fs from "node:fs"
-import path from 'node:path';
-
 const numberMap = [
     "one",
     "two",
@@ -13,8 +10,7 @@ const numberMap = [
     "nine"
 ]
 
-export default function main(part: 1 | 2){
-    const input = fs.readFileSync(path.join(__dirname, "input.txt")).toString()
+export default function main(input: string, part: 1 | 2){
     const lines = input.split("\r\n")
     return lines.map(line => {
         const numbers: string[] = []
@@ -27,15 +23,15 @@ export default function main(part: 1 | 2){
             for(const n2 in numberMap){
                 const numberLetters = numberMap[n2]
                 let j = 0
-                while(numberLetters[j] && line[i+j] == numberLetters[j]){
-                    if(j == numberLetters.length){
-                        numbers.push(n2)
-                        break
+                while (i + j < line.length && line[i+j] == numberLetters[j]) {
+                    if (j == numberLetters.length - 1) {
+                        numbers.push((Number(n2) + 1).toString());
+                        break;
                     }
-                    j++
+                    j += 1;
                 }
             }
         }
         return Number(numbers[0] + numbers[numbers.length - 1])
-    })/* .reduce((a, b) => a+b, 0) */
+    }).reduce((a, b) => a+b, 0)
 }
