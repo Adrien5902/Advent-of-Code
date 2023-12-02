@@ -1,0 +1,25 @@
+{
+    "name": "typescript-advent-of-code",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.ts",
+    "scripts": {
+        "test": "npx ts-node ."
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Adrien5902/Advent-of-Code-2023.git"
+    },
+    "workspaces": [
+        "days/*"
+    ],
+    "author": "Adrien5902",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/Adrien5902/Advent-of-Code-2023/issues"
+    },
+    "homepage": "https://github.com/Adrien5902/Advent-of-Code-2023#readme",
+    "devDependencies": {
+        "ts-node": "^10.9.1"
+    }
+}
