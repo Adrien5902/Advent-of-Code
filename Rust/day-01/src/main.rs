@@ -22,7 +22,7 @@ fn main() {
     let inputpath = "../../Inputs/01.txt";
     let data = String::from_utf8(fs::read(inputpath).expect("file not found")).expect("");
     
-    let lines: Vec<&str> = data.split("\r\n").collect();
+    let lines: Vec<&str> = data.lines().collect();
     let line_numbers = lines.iter().map(|line| {
         let charvec: Vec<char> = line.chars().collect();
         let mut numbers: Vec<char> = Vec::new();
