@@ -16,7 +16,7 @@ enum Color {
 }
 
 fn main() {
-    let part: u8 = 1;
+    let part: u8 = 2;
 
     let input = String::from_utf8(read("../../Inputs/02.txt").expect("file not found")).expect("");
     let games: Vec<&str> = input.lines().collect();
@@ -71,5 +71,19 @@ fn main() {
         });
 
         println!("{:?}", result.reduce(|a, b| a + b).unwrap());
+    }else if part == 2{
+        let result = games_sets.iter().map(|game| {
+            let subsets = game.iter().flatten();
+            subsets.clone().filter(|ss| matches!(ss.color, Color::Red))
+            .reduce(|a,b| if a.count > b.count {a} else {b}).unwrap().count
+            
+            *subsets.clone().filter(|ss| matches!(ss.color, Color::Green))
+            .reduce(|a,b| if a.count > b.count {a} else {b}).unwrap().count
+
+            *subsets.clone().filter(|ss| matches!(ss.color, Color::Blue))
+            .reduce(|a,b| if a.count > b.count {a} else {b}).unwrap().count
+        });
+
+        println!("{:?}", result.reduce(|a,b| a + b).unwrap());
     }
 }
