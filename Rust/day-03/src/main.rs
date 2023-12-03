@@ -1,4 +1,5 @@
 use aoc::loadinput;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 struct Number {
     line: usize,
     start_index: usize,
@@ -162,7 +163,7 @@ fn main() {
         }
     });
 
-    let ratios = standalone_gears.iter().map(|gear| {
+    let ratios = standalone_gears.par_iter().map(|gear| {
         let adjacent_numbers: Vec<u32> = gears
             .clone()
             .filter(|g| g.index == gear.index && g.line == gear.line)
