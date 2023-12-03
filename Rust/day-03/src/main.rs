@@ -1,9 +1,4 @@
 use aoc::loadinput;
-use rayon::{
-    self,
-    iter::{IntoParallelIterator, IntoParallelRefIterator, IntoParallelRefMutIterator},
-};
-
 struct Number {
     line: usize,
     start_index: usize,
@@ -82,7 +77,7 @@ fn get_commponents_from_number(lines: Vec<&str>, n: &Number) -> Vec<Component> {
             },
             Component {
                 number: n.number,
-                index: right_index,
+                index: right_index - 1,
                 line: n.line,
                 char: chars[right_index - 1],
             },
@@ -117,7 +112,7 @@ fn main() {
                 char = chars[i];
             }
             if nums.len() > 0 {
-                let end_index = i;
+                let end_index: usize = i;
                 let number: u32 = nums.parse().unwrap();
                 numbers.push(Number {
                     start_index,
@@ -153,17 +148,21 @@ fn main() {
         .filter(|v: &Vec<Component>| v.len() > 0)
         .flatten();
 
-    let mut standalone_gears = gears.clone().collect::<Vec<Component>>();
-    standalone_gears.dedup_by(|a, b| {
-        if a.line == 115 {
-            println!("{:?}", a.index == b.index && a.line == b.line);
+    let mut standalone_gears: Vec<Component> = vec![];
+    gears.clone().for_each(|a| {
+        let current_gears = standalone_gears.clone();
+        if match current_gears
+            .iter()
+            .find(|b| a.index == b.index && a.line == b.line)
+        {
+            Some(_) => false,
+            None => true,
+        } {
+            standalone_gears.push(a.to_owned())
         }
-        a.index == b.index && a.line == b.line
     });
 
-    // println!("{:?}", standalone_gears);
-
-    let ratios = standalone_gears.into_par_iter().map(|gear| {
+    let ratios = standalone_gears.iter().map(|gear| {
         let adjacent_numbers: Vec<u32> = gears
             .clone()
             .filter(|g| g.index == gear.index && g.line == gear.line)
@@ -171,11 +170,7 @@ fn main() {
             .collect();
 
         if adjacent_numbers.len() == 2 {
-            adjacent_numbers
-                .iter()
-                .map(|n| *n)
-                .reduce(|a, b| a * b)
-                .unwrap()
+            adjacent_numbers[0] * adjacent_numbers[1]
         } else {
             0
         }
