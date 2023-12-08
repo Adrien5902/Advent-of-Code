@@ -1,15 +1,37 @@
 use aoc::loadinput;
 use rayon::prelude::*;
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Clone, Copy)]
 enum Side {
     L,
     R,
 }
 
-struct Node<'a> {
-    name: &'a str,
-    sides: [&'a str; 2],
+struct Node {
+    n: [u8; 3],
+    s: [[u8; 3]; 2],
+}
+
+static ALPHABET: [char; 26] = [
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S',
+    'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+];
+
+fn lcm(a: usize, b: usize) -> usize {
+    a * b / gcd(a, b)
+}
+
+fn gcd(mut a: usize, mut b: usize) -> usize {
+    while b != 0 {
+        let remainder = a % b;
+        a = b;
+        b = remainder;
+    }
+    a
+}
+
+fn llcm(nums: Vec<usize>) -> usize {
+    nums.iter().map(|n| *n).reduce(lcm).unwrap_or(nums[0])
 }
 
 fn main() {
@@ -29,61 +51,67 @@ fn main() {
     let nodes: Vec<Node> = lines[2..]
         .iter()
         .map(|n| {
-            let [name, sides]: [&str; 2] =
-                n.split(" = ").collect::<Vec<&str>>().try_into().unwrap();
+            let [n, s]: [&str; 2] = n.split(" = ").collect::<Vec<&str>>().try_into().unwrap();
 
-            let mut formated_sides = sides.chars();
-            formated_sides.next();
-            formated_sides.next_back();
+            let mut formated_s = s.chars();
+            formated_s.next();
+            formated_s.next_back();
 
             Node {
-                name,
-                sides: formated_sides
+                n: n.chars()
+                    .map(|c| ALPHABET.iter().position(|l| *l == c).unwrap() as u8)
+                    .collect::<Vec<u8>>()
+                    .try_into()
+                    .unwrap(),
+                s: formated_s
                     .as_str()
                     .split(", ")
-                    .collect::<Vec<&str>>()
+                    .map(|side| {
+                        side.chars()
+                            .map(|c| ALPHABET.iter().position(|l| *l == c).unwrap() as u8)
+                            .collect::<Vec<u8>>()
+                            .try_into()
+                            .unwrap()
+                    })
+                    .collect::<Vec<[u8; 3]>>()
                     .try_into()
                     .unwrap(),
             }
         })
         .collect();
 
-    let mut current_nodes = if part == 1 {
-        vec![nodes.iter().find(|node| node.name == "AAA").unwrap()]
-    } else {
-        nodes
+    let start_nodes = if part == 1 {
+        vec![nodes
             .iter()
-            .filter(|node| node.name.ends_with("A"))
-            .collect()
+            .find(|node| node.n.iter().all(|l| *l == 0))
+            .unwrap()]
+    } else {
+        nodes.iter().filter(|node| node.n[2] == 0).collect()
     };
 
-    let mut step = 0;
-    let mut condition = true;
+    let checker: fn(&Node) -> bool = if part == 1 {
+        |node| node.n.iter().all(|l| *l == 25)
+    } else {
+        |node| node.n[2] == 25
+    };
 
-    while condition {
-        let side = sequence[step % sequence.len()];
+    let steps = start_nodes
+        .par_iter()
+        .map(|node| {
+            let mut step = 0;
+            let mut current_node = *node;
 
-        current_nodes = current_nodes
-            .par_iter()
-            .map(|node| {
-                let new_name = node.sides[side as usize];
-                nodes.iter().find(|node| node.name == new_name).unwrap()
-            })
-            .collect();
+            while !checker(current_node) {
+                let new_n = current_node.s[sequence[step % sequence.len()] as usize];
 
-        println!(
-            "{:?}",
-            current_nodes.iter().map(|n| n.name).collect::<Vec<&str>>()
-        );
+                current_node = nodes.iter().find(|node| node.n == new_n).unwrap();
 
-        condition = if part == 1 {
-            !current_nodes.iter().all(|n| n.name == "ZZZ")
-        } else {
-            !current_nodes.iter().all(|n| n.name.ends_with("Z"))
-        };
+                step += 1;
+            }
 
-        step += 1;
-    }
+            step
+        })
+        .collect::<Vec<usize>>();
 
-    println!("{:?}", step);
+    println!("{:?}", llcm(steps));
 }
