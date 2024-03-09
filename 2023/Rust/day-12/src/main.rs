@@ -21,6 +21,9 @@ fn is_valid(springs: Vec<Spring>, arrangment: &Vec<u32>) -> bool {
         if spring.is(Spring::Broken) {
             stack += 1;
         } else if spring.is(Spring::Working) && stack > 0 {
+            if arrangment[broken_arrangment.len()] != stack {
+                false
+            }
             broken_arrangment.push(stack);
             stack = 0;
         }
@@ -33,8 +36,14 @@ fn is_valid(springs: Vec<Spring>, arrangment: &Vec<u32>) -> bool {
     broken_arrangment == *arrangment
 }
 
+fn unfold((springs, arrangment): &(Vec<Spring>, Vec<u32>)) -> (Vec<Spring>, Vec<u32>) {
+    let folded_by = 5;
+    (springs.repeat(folded_by), arrangment.repeat(folded_by))
+}
+
 fn main() {
-    let input = loadinput("12");
+    let part = 2;
+    let input = loadinput("12_test");
     let lines: Vec<(Vec<Spring>, Vec<u32>)> = input
         .lines()
         .map(|line| {
@@ -53,7 +62,13 @@ fn main() {
         })
         .collect();
 
-    let result: Vec<u32> = lines
+    let data = if part == 1 {
+        lines
+    } else {
+        lines.iter().map(|line| unfold(&line)).collect()
+    };
+
+    let result: Vec<u32> = data
         .par_iter()
         .map(|(springs, arrangment)| {
             let unknown_springs = springs
@@ -69,7 +84,7 @@ fn main() {
             let mut valid_ones = 0;
 
             for i in 0..possiblities {
-                let binary: Vec<char> = format!("{i:#032b}").chars().rev().collect();
+                let binary: Vec<char> = format!("{i:#0128b}").chars().rev().collect();
                 let mut new_arangment = springs.clone();
                 let suite =
                     unknown_springs
