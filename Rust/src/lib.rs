@@ -1,4 +1,4 @@
-use std::{env::current_dir, fs::read};
+use std::{env::current_dir, fs::read, time::Instant};
 
 pub fn loadinput() -> String {
     let dir = current_dir().unwrap();
@@ -7,4 +7,15 @@ pub fn loadinput() -> String {
     let day = &day_str[day_str.len() - 2..];
     let year = path.next_back().unwrap().to_str().unwrap();
     String::from_utf8(read(format!("../../../Inputs/{year}/{day}.txt")).unwrap()).unwrap()
+}
+
+pub fn bench<F>(f: F)
+where
+    F: Fn() -> (),
+{
+    let start = Instant::now();
+    f();
+    let time = Instant::now() - start;
+
+    println!("time elapsed: {:?}", time);
 }
